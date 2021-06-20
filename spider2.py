@@ -10,7 +10,7 @@ import multiprocessing
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s: %(message)s')
 
-BASE_URL = 'https://static1.scrape.cuiqingcai.com'
+BASE_URL = 'https://ssr1.scrape.center'
 TOTAL_PAGE = 10
 
 RESULTS_DIR = 'results'
