@@ -16,6 +16,7 @@ TOTAL_PAGE = 10
 RESULTS_DIR = 'results'
 exists(RESULTS_DIR) or makedirs(RESULTS_DIR)
 
+
 def scrape_page(url):
     """
     scrape page by url and return its html
@@ -27,9 +28,11 @@ def scrape_page(url):
         response = requests.get(url)
         if response.status_code == 200:
             return response.text
-        logging.error('get invalid status code %s while scraping %s', response.status_code, url)
+        logging.error('get invalid status code %s while scraping %s',
+                      response.status_code, url)
     except requests.RequestException:
         logging.error('error occurred while scraping %s', url, exc_info=True)
+
 
 def scrape_index(page):
     """
@@ -40,19 +43,21 @@ def scrape_index(page):
     index_url = f'{BASE_URL}/page/{page}'
     return scrape_page(index_url)
 
+
 def parse_index(html):
     """
-    parse index page
+    parse index page and return detail url
     :param html: html of index page
-    :return: generator of detail page url
     """
-    doc = pq(html)
-    links = doc('.el-card .name')
-    for link in links.items():
-        href = link.attr('href')
-        detail_url = urljoin(BASE_URL, href)
+    pattern = re.compile('<a.*?href="(.*?)".*?class="name">')
+    items = re.findall(pattern, html)
+    if not items:
+        return []
+    for item in items:
+        detail_url = urljoin(BASE_URL, item)
         logging.info('get detail url %s', detail_url)
         yield detail_url
+
 
 def scrape_detail(url):
     """
@@ -62,27 +67,36 @@ def scrape_detail(url):
     """
     return scrape_page(url)
 
+
 def parse_detail(html):
     """
     parse detail page
     :param html: html of detail page
     :return: data
     """
-    
-    cover_pattern = re.compile('class="item.*?<img.*?src="(.*?)".*?class="cover">', re.S)
+
+    cover_pattern = re.compile(
+        'class="item.*?<img.*?src="(.*?)".*?class="cover">', re.S)
     name_pattern = re.compile('<h2.*?>(.*?)</h2>')
-    categories_pattern = re.compile('<button.*?category.*?<span>(.*?)</span>.*?</button>', re.S)
+    categories_pattern = re.compile(
+        '<button.*?category.*?<span>(.*?)</span>.*?</button>', re.S)
     published_at_pattern = re.compile('(\d{4}-\d{2}-\d{2})\s?上映')
     drama_pattern = re.compile('<div.*?drama.*?>.*?<p.*?>(.*?)</p>', re.S)
     score_pattern = re.compile('<p.*?score.*?>(.*?)</p>', re.S)
-    
-    cover = re.search(cover_pattern, html).group(1).strip() if re.search(cover_pattern, html) else None
-    name = re.search(name_pattern, html).group(1).strip() if re.search(name_pattern, html) else None
-    categories = re.findall(categories_pattern, html) if re.findall(categories_pattern, html) else []
-    published_at = re.search(published_at_pattern, html).group(1) if re.search(published_at_pattern, html) else None
-    drama = re.search(drama_pattern, html).group(1).strip() if re.search(drama_pattern, html) else None
-    score = float(re.search(score_pattern, html).group(1).strip()) if re.search(score_pattern, html) else None
-    
+
+    cover = re.search(cover_pattern, html).group(
+        1).strip() if re.search(cover_pattern, html) else None
+    name = re.search(name_pattern, html).group(
+        1).strip() if re.search(name_pattern, html) else None
+    categories = re.findall(categories_pattern, html) if re.findall(
+        categories_pattern, html) else []
+    published_at = re.search(published_at_pattern, html).group(
+        1) if re.search(published_at_pattern, html) else None
+    drama = re.search(drama_pattern, html).group(
+        1).strip() if re.search(drama_pattern, html) else None
+    score = float(re.search(score_pattern, html).group(1).strip()
+                  ) if re.search(score_pattern, html) else None
+
     return {
         'cover': cover,
         'name': name,
@@ -92,6 +106,7 @@ def parse_detail(html):
         'score': score
     }
 
+
 def save_data(data):
     """
     save to json file
@@ -100,7 +115,9 @@ def save_data(data):
     """
     name = data.get('name')
     data_path = f'{RESULTS_DIR}/{name}.json'
-    json.dump(data, open(data_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    json.dump(data, open(data_path, 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=2)
+
 
 def main(page):
     """
@@ -116,6 +133,7 @@ def main(page):
         logging.info('saving data to json file')
         save_data(data)
         logging.info('data saved successfully')
+
 
 if __name__ == '__main__':
     pool = multiprocessing.Pool()
