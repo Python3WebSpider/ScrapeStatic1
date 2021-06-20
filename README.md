@@ -1,6 +1,6 @@
 # ScrapeStatic1
 
-Spider for https://static1.scrape.cuiqingcai.com/
+Spider for https://ssr1.scrape.center/
 
 ## PyQuery + MongoDB + 多进程版
 
