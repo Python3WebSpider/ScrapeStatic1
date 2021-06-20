@@ -10,7 +10,7 @@ import multiprocessing
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s: %(message)s')
 
-BASE_URL = 'https://static1.scrape.cuiqingcai.com'
+BASE_URL = 'https://ssr1.scrape.center'
 TOTAL_PAGE = 10
 MONGO_CONNECTION_STRING = 'mongodb://localhost:27017'
 MONGO_DB_NAME = 'movies'
